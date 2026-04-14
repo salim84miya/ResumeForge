@@ -2,25 +2,20 @@ package com.springai.resumax.profile.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.util.List;
+import lombok.Generated;
 
 @Entity
 @Data
-public class Project {
+public class UserEducation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String timeline; // "Jan 2025 – Mar 2025"
 
-    @OneToMany(mappedBy = "project")
-    private List<ProjectDescription> description;
+    private String qualification; // company / org
+    private String timeline;
+    private String grade;
 
     @ManyToOne
     private UserProfile userProfile;
-
-    private String link;
-
 }

@@ -1,8 +1,14 @@
 package com.springai.resumax.profile.entity;
 
+import com.springai.resumax.ai.entity.Education;
+import com.springai.resumax.ai.entity.Experience;
+import com.springai.resumax.ai.entity.Project;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -18,17 +24,21 @@ public class UserProfile {
     private String linkedIn;
     private String location;
     private String summary;
-
-    @OneToOne(mappedBy = "userProfile")
-    private Education education;
+    private String skills;
 
     @OneToMany(mappedBy = "userProfile")
-    private List<SkillGroup> skillGroups;
+    private List<UserEducation> userEducation;
 
     @OneToMany(mappedBy = "userProfile")
-    private List<Project> projects;
+    private List<UserProject> userProjects;
 
     @OneToMany(mappedBy = "userProfile")
-    private List<Experience> experiences;
+    private List<UserExperience> userExperiences;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
 }

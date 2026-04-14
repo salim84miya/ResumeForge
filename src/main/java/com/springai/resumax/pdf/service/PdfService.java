@@ -1,18 +1,6 @@
-package com.springai.resumax.chat.service;
+package com.springai.resumax.pdf.service;
 
-import com.springai.resumax.profile.entity.Experience;
-import com.springai.resumax.profile.entity.Project;
-import com.springai.resumax.profile.entity.SkillGroup;
-import com.springai.resumax.profile.entity.UserProfile;
-import org.openpdf.text.*;
-import org.openpdf.text.pdf.PdfPCell;
-import org.openpdf.text.pdf.PdfPTable;
-import org.openpdf.text.pdf.PdfWriter;
-import org.openpdf.text.pdf.draw.LineSeparator;
 import org.springframework.stereotype.Service;
-
-import java.io.ByteArrayOutputStream;
-import java.util.Locale;
 
 @Service
 public class PdfService {
