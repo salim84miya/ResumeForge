@@ -47,14 +47,14 @@ public class EducationService {
     }
 
     @Transactional
-    public UserEducation deleteEducation(Long id){
+    public void deleteEducation(Long id){
 
         UserEducation education = educationRepository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("Education data not found"));
 
         educationRepository.delete(education);
 
-        return  education;
+//        return  education;
     }
 
     public UserEducation getEducation(Long id){

@@ -49,7 +49,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public UserProject deleteProject(Long id){
+    public void deleteProject(Long id){
 
         UserProject project = repository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("no data found"));
@@ -57,7 +57,7 @@ public class ProjectService {
        repository.delete(project);
 
 
-        return project;
+//        return project;
     }
 
     public UserProject fetchProject(Long id){
