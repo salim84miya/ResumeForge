@@ -1,8 +1,5 @@
 package com.springai.resumax.profile.entity;
 
-import com.springai.resumax.ai.entity.Education;
-import com.springai.resumax.ai.entity.Experience;
-import com.springai.resumax.ai.entity.Project;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;

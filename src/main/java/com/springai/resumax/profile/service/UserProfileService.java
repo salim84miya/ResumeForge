@@ -48,14 +48,14 @@ public class UserProfileService {
     }
 
     @Transactional
-    public UserProfile deleteProfile(Long id){
+    public void deleteProfile(Long id){
 
         UserProfile userProfile = repository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("no data found"));
 
         repository.delete(userProfile);
 
-        return  userProfile;
+//        return  userProfile;
     }
 
 
