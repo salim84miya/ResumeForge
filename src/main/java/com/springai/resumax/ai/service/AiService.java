@@ -8,9 +8,16 @@ import com.springai.resumax.profile.entity.UserProfile;
 import com.springai.resumax.profile.entity.UserProject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
+import org.springframework.ai.rag.preretrieval.query.expansion.MultiQueryExpander;
+import org.springframework.ai.rag.preretrieval.query.transformation.CompressionQueryTransformer;
+import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
+import org.springframework.ai.rag.preretrieval.query.transformation.TranslationQueryTransformer;
+import org.springframework.ai.rag.retrieval.join.ConcatenationDocumentJoiner;
+import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -289,19 +296,54 @@ public class AiService {
 
     public UserResumeResponse rag(String query,String userId){
 
-        UserResumeResponse response = chatClient.prompt()
-                .advisors(QuestionAnswerAdvisor.builder(vectorStore)
-                        .searchRequest(SearchRequest.builder()
-                                .query(query)
+        RetrievalAugmentationAdvisor advisor = RetrievalAugmentationAdvisor.builder()
+                .queryTransformers(
+                        CompressionQueryTransformer.builder()
+                                .chatClientBuilder(chatClient.mutate().clone())
+                                .build(),
+                        RewriteQueryTransformer.builder()
+                                .chatClientBuilder(chatClient.mutate().clone())
+                                .build(),
+                        TranslationQueryTransformer.builder()
+                                .chatClientBuilder(chatClient.mutate().clone())
+                                .build()
+                )
+                .queryExpander(
+                        MultiQueryExpander.builder()
+                                .chatClientBuilder(chatClient.mutate().clone())
+                                .build()
+                )
+                .documentRetriever(
+                        VectorStoreDocumentRetriever.builder()
+                                .vectorStore(vectorStore)
                                 .similarityThreshold(0.3)
+                                .filterExpression(
+                                        new FilterExpressionBuilder()
+                                                .eq("userId",userId)
+                                                .build()
+                                )
                                 .topK(3)
-                                .filterExpression(new FilterExpressionBuilder().eq("userId",userId).build())
-                                .build())
-                        .build())
+                                .build()
+                )
+                .documentJoiner(
+                        new ConcatenationDocumentJoiner()
+                )
+                .queryAugmenter(
+                        ContextualQueryAugmenter.builder().build()
+                )
+                .build();
+
+        UserResumeResponse response = chatClient.prompt()
+                .advisors(advisorSpec -> {
+
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID,userId);
+                })
+                .advisors(advisor)
                 .user(query)
                 .call()
                 .entity(ParameterizedTypeReference.forType(UserResumeResponse.class));
 
 
         return  response;
-    }}
+    }
+}
