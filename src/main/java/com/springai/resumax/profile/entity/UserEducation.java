@@ -2,7 +2,6 @@ package com.springai.resumax.profile.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Generated;
 
 @Entity
 @Data

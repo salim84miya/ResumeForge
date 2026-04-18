@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AiController {
 
     private final AiService aiService;
-
-    @GetMapping("/embedding")
-    public void embedding(@RequestParam(value = "q") String query){
-
-        aiService.embedDocuments();
-
-    }
+//
+//    @GetMapping("/embedding")
+//    public void embedding(@RequestParam(value = "q") String query){
+//
+//        aiService.embedDocuments();
+//
+//    }
 
     //doing rag
 

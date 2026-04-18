@@ -2,12 +2,14 @@ package com.springai.resumax.ai.service;
 
 
 import com.springai.resumax.ai.entity.UserResumeResponse;
+import com.springai.resumax.profile.entity.UserEducation;
+import com.springai.resumax.profile.entity.UserExperience;
 import com.springai.resumax.profile.entity.UserProfile;
+import com.springai.resumax.profile.entity.UserProject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
@@ -21,47 +23,268 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AiService {
 
+    private static final String PROJECT_ID = "projectId";
+    private static final String EXPERIENCE_ID = "experienceId";
+    private static final String EDUCATION_ID = "educationId";
 
-    private final EmbeddingModel embeddingModel;
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
 
+    public Document buildProfileDocument(UserProfile userProfile){
 
-    public void embedDocuments(){
-        List<Document> documents = List.of(
+        String userId = userProfile.getUserId();
 
-                // ===== USER 1 (Backend Developer) =====
-                new Document(
-                        "User 1 Resume: Experienced backend developer skilled in Spring Boot, PostgreSQL, Redis, and Docker. Built scalable APIs and authentication systems.",
-                        Map.of("userId", "user_1", "type", "resume")
-                ),
-                new Document(
-                        "User 1 Project: Developed a society management system with JWT authentication, refresh tokens, and multi-device session handling.",
-                        Map.of("userId", "user_1", "type", "project")
-                ),
-                new Document(
-                        "User 1 Skills: Java, Spring Boot, Microservices, Redis caching, system design.",
-                        Map.of("userId", "user_1", "type", "skills")
-                ),
+        String content = """
+                Name: %s
+                Location: %s
+                Email: %s
+                LinkedIn: %s
+                """.formatted(
+                        userProfile.getName(),
+                userProfile.getLocation(),
+                userProfile.getEmail(),
+                userProfile.getLinkedIn()
+        );
 
-                // ===== USER 2 (Frontend Developer) =====
-                new Document(
-                        "User 2 Resume: Frontend developer specializing in React, Tailwind CSS, and modern UI/UX design. Focused on responsive and accessible web apps.",
-                        Map.of("userId", "user_2", "type", "resume")
-                ),
-                new Document(
-                        "User 2 Project: Built a fitness tracking web app with React, charts, and real-time state management.",
-                        Map.of("userId", "user_2", "type", "project")
-                ),
-                new Document(
-                        "User 2 Skills: JavaScript, React, CSS, UI/UX, performance optimization.",
-                        Map.of("userId", "user_2", "type", "skills")
+        return new Document(
+                content,
+                Map.of(
+                        "userId",userId,
+                        "type","profile"
                 )
         );
-        // Add the documents to PGVector
-        vectorStore.add(documents);
 
-//        EmbeddingResponse response = embeddingModel.embedForResponse(List.of(query));
+    }
+
+    public void embedProfileDocuments(UserProfile userProfile){
+
+        Document document = buildProfileDocument(userProfile);
+        vectorStore.add(List.of(document));
+    }
+
+    public void updateEmbedProfileDocuments(UserProfile userProfile){
+
+        deleteEmbedProfileDocuments(userProfile);
+        embedProfileDocuments(userProfile);
+
+    }
+
+    public void deleteEmbedProfileDocuments(UserProfile userProfile){
+
+        String userId = userProfile.getUserId();
+
+        deleteByDocsType(userId,"profile");
+    }
+
+    public Document buildSkillsDocuments(String skills,String userId){
+
+        String content= """
+                Skills: %s
+                """.formatted(
+                        skills
+        );
+
+        return new Document(
+                content,
+                Map.of("userId",userId,
+                        "type","skills"));
+    }
+
+    public void embedSkillsDocuments(UserProfile userProfile){
+
+        Document document = buildSkillsDocuments(userProfile.getSkills(),userProfile.getUserId());
+        vectorStore.add(List.of(document));
+    }
+
+    public void deleteEmbedSkillsDocuments(UserProfile userProfile){
+        deleteByDocsType(userProfile.getUserId(),"skills");
+    }
+
+    public void updateEmbedSkillsDocuments(UserProfile userProfile){
+
+        deleteEmbedSkillsDocuments(userProfile);
+        embedSkillsDocuments(userProfile);
+    }
+
+    public Document buildSummaryDocuments(String summary,String userId){
+
+        String content= """
+                Summary: %s
+                """.formatted(
+                summary
+        );
+
+        return new Document(
+                content,
+                Map.of("userId",userId,
+                        "type","summary"));
+    }
+
+    public void embedSummaryDocuments(UserProfile userProfile){
+
+        Document document = buildSummaryDocuments(userProfile.getSummary(),userProfile.getUserId());
+        vectorStore.add(List.of(document));
+    }
+
+    public void deleteEmbedSummaryDocuments(UserProfile userProfile){
+        deleteByDocsType(userProfile.getUserId(),"summary");
+    }
+
+    public void updateEmbedSummaryDocuments(UserProfile userProfile){
+        deleteEmbedSummaryDocuments(userProfile);
+        embedSummaryDocuments(userProfile);
+    }
+
+    private Document buildProjectDocument(UserProject project) {
+
+        String content = """
+    Project: %s
+    Link: %s
+    Description: %s
+    Timeline: %s
+    """.formatted(
+                project.getName(),
+                project.getLink(),
+                project.getDescription(),
+                project.getTimeline()
+        );
+
+        return new Document(
+                content,
+                Map.of(
+                        "userId", project.getUserProfile().getUserId(),
+                        "docId", PROJECT_ID + project.getId(),
+                        "type", "project"
+                )
+        );
+    }
+
+    public void embedProjectDocuments(UserProject project){
+
+        Document document = buildProjectDocument(project);
+
+        vectorStore.add(List.of(document));
+    }
+
+    public void updateEmbedProjectDocuments(UserProject newProject){
+
+      deleteEmbedProjectDocuments(newProject);
+      embedProjectDocuments(newProject);
+    }
+
+    public void deleteEmbedProjectDocuments(UserProject newProject){
+
+        String userId = newProject.getUserProfile().getUserId();
+
+        deleteByDocsId(userId,PROJECT_ID+ newProject.getId());
+
+    }
+
+    private Document buildExperienceDocument(UserExperience experience) {
+
+        String content = """
+    Organization: %s
+    Description: %s
+    Timeline: %s
+    """.formatted(
+                experience.getOrganization(),
+                experience.getDescription(),
+                experience.getTimeline()
+        );
+
+        return new Document(
+                content,
+                Map.of(
+                        "userId", experience.getUserProfile().getUserId(),
+                        "docId", EXPERIENCE_ID + experience.getId(),
+                        "type", "experience"
+                )
+        );
+    }
+
+    public void embedExperienceDocuments(UserExperience experience){
+
+        Document experienceDocument = buildExperienceDocument(experience);
+
+        vectorStore.add(List.of(experienceDocument));
+    }
+
+    public  void updateEmbedExperienceDocuments(UserExperience newExperience){
+
+        deleteEmbedExperienceDocument(newExperience);
+        embedExperienceDocuments(newExperience);
+    }
+
+    public void deleteEmbedExperienceDocument(UserExperience experience){
+
+        String userId = experience.getUserProfile().getUserId();
+
+        deleteByDocsId(userId,EXPERIENCE_ID+experience.getId());
+    }
+
+    public Document buildEducationDocuments(UserEducation education){
+
+        String userId = education.getUserProfile().getUserId();
+
+        String content = """
+                Qualification: %s
+                grade: %s
+                timeline: %s
+                """.formatted(
+                    education.getQualification(),
+                    education.getGrade(),
+                    education.getTimeline()
+                );
+
+        return new Document(content,
+                Map.of("userId",userId,
+                        "docId",EDUCATION_ID+education.getId(),
+                        "type","education")
+        );
+    }
+
+    public void embedEducationDocuments(UserEducation education){
+
+         Document educationDocument = buildEducationDocuments(education);
+
+        vectorStore.add(List.of(educationDocument));
+    }
+
+    public void deleteEmbedEducationDocument(UserEducation education){
+
+        String userId = education.getUserProfile().getUserId();
+
+        deleteByDocsId(userId,EDUCATION_ID+education.getId());
+
+    }
+
+    public void updateEmbedEducationDocument(UserEducation education){
+
+        deleteEmbedEducationDocument(education);
+        embedEducationDocuments(education);
+    }
+
+    public void deleteByDocsType(String userId,String type){
+
+        FilterExpressionBuilder builder = new FilterExpressionBuilder();
+
+        vectorStore.delete(
+                builder.and(
+                        builder.eq("userId",userId),
+                        builder.eq("type",type)
+                ).build()
+        );
+    }
+    public void deleteByDocsId(String userId,String docId){
+
+        FilterExpressionBuilder builder = new FilterExpressionBuilder();
+
+        vectorStore.delete(
+                builder.and(
+                        builder.eq("userId",userId),
+                        builder.eq("docId",docId)
+                ).build()
+        );
     }
 
     public UserResumeResponse rag(String query,String userId){

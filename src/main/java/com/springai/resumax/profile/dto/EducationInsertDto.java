@@ -1,6 +1,5 @@
 package com.springai.resumax.profile.dto;
 
-import jakarta.persistence.*;
 import lombok.Data;
 
 
