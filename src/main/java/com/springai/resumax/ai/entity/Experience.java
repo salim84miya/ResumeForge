@@ -2,6 +2,8 @@ package com.springai.resumax.ai.entity;
 
 import lombok.Data;
 
+import java.util.List;
+
 
 @Data
 public class Experience {
@@ -9,6 +11,6 @@ public class Experience {
     private String organization; // company / org
     private String timeline;
 
-    private String description;
+    private List<String> description;
 
 }

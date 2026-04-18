@@ -1,9 +1,7 @@
 package com.springai.resumax.profile.service;
 
-import com.springai.resumax.profile.dto.UserProfileUpdateDto;
 import com.springai.resumax.profile.dto.UserProjectInsertDto;
 import com.springai.resumax.profile.dto.UserProjectUpdateDto;
-import com.springai.resumax.profile.entity.UserEducation;
 import com.springai.resumax.profile.entity.UserProfile;
 import com.springai.resumax.profile.entity.UserProject;
 import com.springai.resumax.profile.repository.ProjectRepository;

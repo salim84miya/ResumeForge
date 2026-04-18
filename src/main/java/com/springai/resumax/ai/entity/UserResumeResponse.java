@@ -14,7 +14,7 @@ public class UserResumeResponse {
     private String location;
     private String summary;
 
-    private Education education;
+    private List<Education> education;
 
     private List<SkillGroup> skillGroups;
 
