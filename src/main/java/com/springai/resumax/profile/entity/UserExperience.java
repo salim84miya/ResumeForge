@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,8 +15,10 @@ public class UserExperience {
     private String organization; // company / org
     private String timeline;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
+    @JsonIgnore
     @ManyToOne
     private UserProfile userProfile;
 

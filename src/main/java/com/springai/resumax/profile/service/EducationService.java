@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.service;
 
+import com.springai.resumax.ai.service.AiService;
 import com.springai.resumax.profile.dto.EducationInsertDto;
 import com.springai.resumax.profile.dto.EducationUpdateDto;
 import com.springai.resumax.profile.entity.UserEducation;
@@ -16,6 +17,8 @@ public class EducationService {
     private final EducationRepository educationRepository;
     private final UserProfileService userProfileService;
 
+    private final AiService aiService;
+
     @Transactional
     public UserEducation saveEducation(EducationInsertDto dto){
 
@@ -29,7 +32,11 @@ public class EducationService {
         UserProfile profile = userProfileService.fetchProfile(dto.getProfileId());
         education.setUserProfile(profile);
 
-        return educationRepository.save(education);
+        education= educationRepository.save(education);
+
+        aiService.embedEducationDocuments(education);
+
+        return education;
 
     }
 

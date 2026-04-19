@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ public class UserEducation {
     private String timeline;
     private String grade;
 
+    @JsonIgnore
     @ManyToOne
     private UserProfile userProfile;
 }

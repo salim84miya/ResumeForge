@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.service;
 
+import com.springai.resumax.ai.service.AiService;
 import com.springai.resumax.profile.dto.UserProfileInsertDto;
 import com.springai.resumax.profile.dto.UserProfileUpdateDto;
 import com.springai.resumax.profile.entity.UserProfile;
@@ -14,6 +15,8 @@ public class UserProfileService {
 
     private final UserProfileRepository repository;
 
+    private final AiService aiService;
+
     @Transactional
     public UserProfile saveProfile(UserProfileInsertDto dto){
 
@@ -27,7 +30,14 @@ public class UserProfileService {
         userProfile.setSkills(dto.getSkills());
         userProfile.setLinkedIn(dto.getLinkedIn());
 
-        return  repository.save(userProfile);
+
+        userProfile =  repository.save(userProfile);
+
+        aiService.embedProfileDocuments(userProfile);
+        aiService.embedSkillsDocuments(userProfile);
+        aiService.embedSummaryDocuments(userProfile);
+
+        return userProfile;
     }
 
     @Transactional

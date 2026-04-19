@@ -1,9 +1,7 @@
 package com.springai.resumax.profile.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -17,10 +15,12 @@ public class UserProject {
     private String name;
     private String timeline; // "Jan 2025 – Mar 2025"
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private String link;
 
+    @JsonIgnore
     @ManyToOne
     private UserProfile userProfile;
 }

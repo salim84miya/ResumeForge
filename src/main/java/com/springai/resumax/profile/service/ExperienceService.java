@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.service;
 
+import com.springai.resumax.ai.service.AiService;
 import com.springai.resumax.profile.dto.UserExperienceInsertDto;
 import com.springai.resumax.profile.dto.UserExperienceUpdateDto;
 import com.springai.resumax.profile.entity.UserExperience;
@@ -16,6 +17,8 @@ public class ExperienceService {
     private final ExperienceRepository repository;
     private final UserProfileService profileService;
 
+    private final AiService aiService;
+
     @Transactional
     public UserExperience saveExperience(UserExperienceInsertDto dto){
 
@@ -28,7 +31,11 @@ public class ExperienceService {
         UserProfile profile = profileService.fetchProfile(dto.getProfileId());
         experience.setUserProfile(profile);
 
-        return  repository.save(experience);
+        experience=  repository.save(experience);
+
+        aiService.embedExperienceDocuments(experience);
+
+        return  experience;
     }
 
     @Transactional

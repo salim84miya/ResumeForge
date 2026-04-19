@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.service;
 
+import com.springai.resumax.ai.service.AiService;
 import com.springai.resumax.profile.dto.UserProjectInsertDto;
 import com.springai.resumax.profile.dto.UserProjectUpdateDto;
 import com.springai.resumax.profile.entity.UserProfile;
@@ -16,6 +17,7 @@ public class ProjectService {
 
     private final ProjectRepository repository;
     private final UserProfileService profileService;
+    private final AiService aiService;
 
     @Transactional
     public UserProject saveProject(UserProjectInsertDto dto){
@@ -30,7 +32,11 @@ public class ProjectService {
         UserProfile profile = profileService.fetchProfile(dto.getProfileId());
         project.setUserProfile(profile);
 
-        return repository.save(project);
+        project = repository.save(project);
+
+        aiService.embedProjectDocuments(project);
+
+        return  project;
     }
 
     @Transactional
