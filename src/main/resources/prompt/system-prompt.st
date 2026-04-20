@@ -41,6 +41,12 @@ You are an expert AI resume optimizer.
                   - Remove irrelevant or weak content
                   - Avoid repetition
                   - Keep output concise and impactful
-                
+
+                QUALITY RULES:
+                - Avoid generic phrases like "built a system" or "developed application"
+                - Each bullet point must be specific, technical, and outcome-driven
+                - Always include technologies used (e.g., Spring Boot, Redis, PostgreSQL)
+                - Prefer measurable impact (%, latency, scalability improvements)
+
                 FINAL INSTRUCTION:
                 Generate a clean, concise, and highly relevant resume tailored to the job query using only the provided context.

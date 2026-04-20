@@ -1,11 +1,9 @@
 package com.springai.resumax.ai.service;
 
 
+import com.springai.resumax.ai.entity.JobDetails;
 import com.springai.resumax.ai.entity.UserResumeResponse;
-import com.springai.resumax.profile.entity.UserEducation;
-import com.springai.resumax.profile.entity.UserExperience;
-import com.springai.resumax.profile.entity.UserProfile;
-import com.springai.resumax.profile.entity.UserProject;
+import com.springai.resumax.profile.entity.*;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
@@ -110,20 +108,20 @@ public class AiService {
                         "type", "skills"));
     }
 
-    public void embedSkillsDocuments(UserProfile userProfile) {
+    public void embedSkillsDocuments(String skills,String userId) {
 
-        Document document = buildSkillsDocuments(userProfile.getSkills(), userProfile.getUserId());
+        Document document = buildSkillsDocuments(skills, userId);
         vectorStore.add(List.of(document));
     }
 
-    public void deleteEmbedSkillsDocuments(UserProfile userProfile) {
-        deleteByDocsType(userProfile.getUserId(), "skills");
+    public void deleteEmbedSkillsDocuments(String userId) {
+        deleteByDocsType(userId, "skills");
     }
 
-    public void updateEmbedSkillsDocuments(UserProfile userProfile) {
+    public void updateEmbedSkillsDocuments(String userId,String skills) {
 
-        deleteEmbedSkillsDocuments(userProfile);
-        embedSkillsDocuments(userProfile);
+        deleteEmbedSkillsDocuments(userId);
+        embedSkillsDocuments(skills,userId);
     }
 
     public Document buildSummaryDocuments(String summary, String userId) {
@@ -311,11 +309,11 @@ public class AiService {
     public UserResumeResponse rag(String query, String userId) {
 
 
-        String optimizedJD = chatClient.prompt()
+        JobDetails optimizedJD = chatClient.prompt()
                 .system(system->system.text(systemExtractionMsg))
                 .user(query)
                 .call()
-                .content();
+                .entity(ParameterizedTypeReference.forType(JobDetails.class));
 
 //        return optimizedJD;
 
@@ -352,7 +350,12 @@ public class AiService {
                 .advisors(advisor)
                 .system(system->system.text(systemMsg))
                 .user(userMessage->
-                        userMessage.text(userPrompt).param("optimizedJD",optimizedJD))
+                        userMessage.text(userPrompt)
+                                .param("role",optimizedJD.getRole())
+                                .param("skills",String.join(",",optimizedJD.getRequiredSkills()))
+                                .param("responsibilities",String.join(",",optimizedJD.getResponsibilities()))
+                                .param("keywords",String.join(",",optimizedJD.getKeywords()))
+                )
                 .call()
                 .entity(ParameterizedTypeReference.forType(UserResumeResponse.class));
 

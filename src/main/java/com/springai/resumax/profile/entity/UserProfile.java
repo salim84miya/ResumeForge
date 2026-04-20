@@ -21,7 +21,9 @@ public class UserProfile {
     private String linkedIn;
     private String location;
     private String summary;
-    private String skills;
+
+    @OneToMany(mappedBy = "userProfile")
+    private List<UserSkill> skills;
 
     @OneToMany(mappedBy = "userProfile")
     private List<UserEducation> userEducation;

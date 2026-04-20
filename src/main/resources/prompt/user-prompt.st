@@ -1,10 +1,22 @@
 Generate a complete ATS-friendly resume using my profile data.
 
-                Job Description:
-                {optimizedJD}
+                Job Role:
+                {role}
+
+                Required Skills:
+                {skills}
+
+                Key Responsibilities:
+                {responsibilities}
+
+                Important Keywords:
+                {keywords}
 
                 Instructions:
-                - Use my projects, experience, skills, and education.
-                - Tailor the resume specifically for this role.
-                - Prioritize relevant technologies and achievements.
-                - Keep it concise and impactful.
+                - Use my projects, experience, skills, and education
+                - Do NOT leave any section empty if data exists
+                - Tailor the resume specifically for this role
+                - Prioritize required skills and important keywords
+                - Highlight achievements and measurable impact
+                - Emphasize strengths that compensate for missing skills
+                - Keep the resume concise, structured, and impactful

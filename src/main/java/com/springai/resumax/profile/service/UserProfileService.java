@@ -27,14 +27,12 @@ public class UserProfileService {
         userProfile.setEmail(dto.getEmail());
         userProfile.setLocation(dto.getLocation());
         userProfile.setSummary(dto.getSummary());
-        userProfile.setSkills(dto.getSkills());
         userProfile.setLinkedIn(dto.getLinkedIn());
 
 
         userProfile =  repository.save(userProfile);
 
         aiService.embedProfileDocuments(userProfile);
-        aiService.embedSkillsDocuments(userProfile);
         aiService.embedSummaryDocuments(userProfile);
 
         return userProfile;
@@ -51,7 +49,6 @@ public class UserProfileService {
         userProfile.setEmail(dto.getEmail());
         userProfile.setLocation(dto.getLocation());
         userProfile.setSummary(dto.getSummary());
-        userProfile.setSkills(dto.getSkills());
         userProfile.setLinkedIn(dto.getLinkedIn());
 
         return  repository.save(userProfile);

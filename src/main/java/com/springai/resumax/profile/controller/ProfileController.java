@@ -1,22 +1,15 @@
 package com.springai.resumax.profile.controller;
 
-import com.springai.resumax.profile.dto.EducationInsertDto;
-import com.springai.resumax.profile.dto.UserExperienceInsertDto;
-import com.springai.resumax.profile.dto.UserProfileInsertDto;
-import com.springai.resumax.profile.dto.UserProjectInsertDto;
-import com.springai.resumax.profile.entity.UserEducation;
-import com.springai.resumax.profile.entity.UserExperience;
-import com.springai.resumax.profile.entity.UserProfile;
-import com.springai.resumax.profile.entity.UserProject;
-import com.springai.resumax.profile.service.EducationService;
-import com.springai.resumax.profile.service.ExperienceService;
-import com.springai.resumax.profile.service.ProjectService;
-import com.springai.resumax.profile.service.UserProfileService;
+import com.springai.resumax.profile.dto.*;
+import com.springai.resumax.profile.entity.*;
+import com.springai.resumax.profile.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,7 +20,7 @@ public class ProfileController {
     private final ProjectService projectService;
     private final ExperienceService experienceService;
     private final EducationService educationService;
-
+    private final UserSkillService skillService;
 
     @PostMapping("/profile")
     public ResponseEntity<UserProfile> saveProfile(@RequestBody UserProfileInsertDto profileInsertDto){
@@ -36,6 +29,16 @@ public class ProfileController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    @PostMapping("/skill")
+    public ResponseEntity<List<UserSkill>> saveSkills(@RequestBody InsertSkillDto dto){
+
+        var response = skillService.saveMultipleSkill(dto);
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping("/project")
     public ResponseEntity<UserProject> saveProject(@RequestBody UserProjectInsertDto projectInsertDto){
