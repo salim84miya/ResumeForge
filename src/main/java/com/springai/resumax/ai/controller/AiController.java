@@ -18,7 +18,7 @@ public class AiController {
     //doing rag
 
     @GetMapping("/rag/{id}")
-    public ResponseEntity<UserResumeResponse> rag(@RequestParam(value = "q") String query, @PathVariable(value = "id")String userId){
+    public ResponseEntity<?> rag(@RequestParam(value = "q") String query, @PathVariable(value = "id")String userId){
 
         var response = aiService.rag(query,userId);
 

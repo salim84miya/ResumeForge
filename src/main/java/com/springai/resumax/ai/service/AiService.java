@@ -6,21 +6,19 @@ import com.springai.resumax.profile.entity.UserEducation;
 import com.springai.resumax.profile.entity.UserExperience;
 import com.springai.resumax.profile.entity.UserProfile;
 import com.springai.resumax.profile.entity.UserProject;
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
-import org.springframework.ai.rag.preretrieval.query.expansion.MultiQueryExpander;
 import org.springframework.ai.rag.preretrieval.query.transformation.CompressionQueryTransformer;
 import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
-import org.springframework.ai.rag.preretrieval.query.transformation.TranslationQueryTransformer;
 import org.springframework.ai.rag.retrieval.join.ConcatenationDocumentJoiner;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,8 +34,19 @@ public class AiService {
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
 
+    @Value("classpath:/prompt/system-prompt.st")
+    private Resource systemMsg;
+
+    @Value("classpath:/prompt/system-extraction.st")
+    private Resource systemExtractionMsg;
+
+    @Value("classpath:/prompt/user-prompt.st")
+    private Resource userPrompt;
+
     public AiService(ChatClient.Builder builder, VectorStore vectorStore) {
-        this.chatClient = builder.build();
+        this.chatClient = builder
+                .defaultAdvisors(List.of(new CustomLoggingAdvisor()))
+                .build();
         this.vectorStore = vectorStore;
     }
 
@@ -303,111 +312,32 @@ public class AiService {
 
 
         String optimizedJD = chatClient.prompt()
-                .system("""
-                        Extract structured job requirements from the job description.
-                        
-                        Return:
-                        - Role
-                        - Required Skills
-                        - Key Responsibilities
-                        - Important Keywords
-                        
-                        Do not summarize loosely. Keep technical details intact.
-                        """)
+                .system(system->system.text(systemExtractionMsg))
                 .user(query)
                 .call()
                 .content();
 
-
-        String userMessage = "Generate a complete ATS-friendly resume using my profile data.\n" +
-                "\n" +
-                "Job Description:\n" + optimizedJD + "\n" +
-                "\n" +
-                "Instructions:\n" +
-                "- Use my projects, experience, skills, and education\n" +
-                "- Tailor the resume specifically for this role\n" +
-                "- Prioritize relevant technologies and achievements\n" +
-                "- Keep it concise and impactful";
-
-        String systemPrompt = """
-                You are an expert AI resume optimizer.
-                
-                Your task is to generate a high-quality, ATS-friendly resume tailored to a specific job description.
-                
-                You will be given:
-                1. Retrieved user context (resume data from database)
-                2. A user query that may include a job description
-                
-                STRICT RULES:
-                - Use ONLY the provided context for user information (skills, projects, experience, education)
-                - DO NOT hallucinate or invent any experience, project, or skill
-                - If information is missing, omit it instead of guessing
-                - You MAY rephrase, optimize, and restructure content for clarity and impact
-                
-                OPTIMIZATION GOALS:
-                - Tailor the resume to match the job description
-                - Prioritize relevant skills, projects, and experience
-                - Use strong action verbs (e.g., Built, Designed, Implemented, Optimized)
-                - Highlight measurable impact wherever possible (e.g., % improvement, latency reduction, scalability gains)
-                - Ensure ATS-friendly content with relevant keywords from the job description
-                
-                CONTENT RULES:
-                - Summary:
-                  - Keep it 2–3 lines
-                  - Tailor it specifically to the job role
-                
-                - Skills:
-                  - Prioritize skills relevant to the job description
-                  - Order matters (most relevant first)
-                
-                - Projects and Experience:
-                  - Each item MUST contain 3 bullet points only
-                  - Each bullet point should follow this structure:
-                    1. Problem / goal
-                    2. Solution implemented
-                    3. Technologies/tools used
-                  - Include measurable impact wherever possible (e.g., improved performance by X%, reduced latency, handled X users)
-                  - Keep points concise, strong, and results-oriented
-                
-                - General:
-                  - Remove irrelevant or weak content
-                  - Avoid repetition
-                  - Keep output concise and impactful
-                
-                FINAL INSTRUCTION:
-                Generate a clean, concise, and highly relevant resume tailored to the job query using only the provided context.
-                """;
-
+//        return optimizedJD;
 
         RetrievalAugmentationAdvisor advisor = RetrievalAugmentationAdvisor.builder()
-                .queryTransformers(
-                        CompressionQueryTransformer.builder()
-                                .chatClientBuilder(chatClient.mutate().clone())
-                                .build(),
-                        RewriteQueryTransformer.builder()
-                                .chatClientBuilder(chatClient.mutate().clone())
-                                .build()
-//                        ,
-//                        TranslationQueryTransformer.builder()
+//                .queryTransformers(
+//                        CompressionQueryTransformer.builder()
 //                                .chatClientBuilder(chatClient.mutate().clone())
-//                                .targetLanguage("english")
-//                                .build()
-                )
-//                .queryExpander(
-//                        MultiQueryExpander.builder()
+//                                .build(),
+//                        RewriteQueryTransformer.builder()
 //                                .chatClientBuilder(chatClient.mutate().clone())
 //                                .build()
 //                )
                 .documentRetriever(
                         VectorStoreDocumentRetriever.builder()
                                 .vectorStore(vectorStore)
-                                .similarityThreshold(0.4)
+                                .similarityThreshold(0.3)
                                 .filterExpression(
                                         new FilterExpressionBuilder()
                                                 .eq("userId", userId)
                                                 .build()
                                 )
-                                .topK(7)
+                                .topK(6)
                                 .build()
                 )
                 .documentJoiner(
@@ -420,8 +350,9 @@ public class AiService {
 
         UserResumeResponse response = chatClient.prompt()
                 .advisors(advisor)
-                .system(systemPrompt)
-                .user(userMessage)
+                .system(system->system.text(systemMsg))
+                .user(userMessage->
+                        userMessage.text(userPrompt).param("optimizedJD",optimizedJD))
                 .call()
                 .entity(ParameterizedTypeReference.forType(UserResumeResponse.class));
 
