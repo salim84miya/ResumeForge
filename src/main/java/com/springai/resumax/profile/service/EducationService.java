@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class EducationService {
@@ -21,6 +23,13 @@ public class EducationService {
 
     @Transactional
     public UserEducation saveEducation(EducationInsertDto dto){
+
+        Optional<UserEducation> existingEducation =
+                educationRepository.findByQualification(dto.getQualification());
+
+        if(existingEducation.isPresent()){
+            throw new IllegalArgumentException("qualification already exists!");
+        }
 
         UserEducation education = new UserEducation();
 
@@ -50,7 +59,11 @@ public class EducationService {
         education.setGrade(educationUpdateDto.getGrade());
         education.setQualification(educationUpdateDto.getQualification());
 
-        return educationRepository.save(education);
+        education = educationRepository.save(education);
+
+        aiService.updateEmbedEducationDocument(education);
+
+        return education;
     }
 
     @Transactional
@@ -61,7 +74,7 @@ public class EducationService {
 
         educationRepository.delete(education);
 
-//        return  education;
+        aiService.deleteEmbedEducationDocument(education);
     }
 
     public UserEducation getEducation(Long id){

@@ -2,14 +2,15 @@ package com.springai.resumax.ai.service;
 
 
 import com.springai.resumax.ai.entity.JobDetails;
+import com.springai.resumax.ai.entity.MatchingValues;
 import com.springai.resumax.ai.entity.UserResumeResponse;
 import com.springai.resumax.profile.entity.*;
+import com.springai.resumax.profile.repository.UserProfileRepository;
+import com.springai.resumax.profile.repository.UserSkillRepository;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
-import org.springframework.ai.rag.preretrieval.query.transformation.CompressionQueryTransformer;
-import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
 import org.springframework.ai.rag.retrieval.join.ConcatenationDocumentJoiner;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -19,8 +20,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class AiService {
@@ -31,6 +34,9 @@ public class AiService {
 
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
+    private final UserSkillRepository skillRepository;
+    private final UserProfileRepository profileRepository;
+
 
     @Value("classpath:/prompt/system-prompt.st")
     private Resource systemMsg;
@@ -41,11 +47,13 @@ public class AiService {
     @Value("classpath:/prompt/user-prompt.st")
     private Resource userPrompt;
 
-    public AiService(ChatClient.Builder builder, VectorStore vectorStore) {
+    public AiService(ChatClient.Builder builder, VectorStore vectorStore, UserSkillRepository skillRepository, UserProfileRepository userProfileRepository) {
         this.chatClient = builder
                 .defaultAdvisors(List.of(new CustomLoggingAdvisor()))
                 .build();
         this.vectorStore = vectorStore;
+        this.skillRepository = skillRepository;
+        this.profileRepository = userProfileRepository;
     }
 
     public Document buildProfileDocument(UserProfile userProfile) {
@@ -108,7 +116,7 @@ public class AiService {
                         "type", "skills"));
     }
 
-    public void embedSkillsDocuments(String skills,String userId) {
+    public void embedSkillsDocuments(String skills, String userId) {
 
         Document document = buildSkillsDocuments(skills, userId);
         vectorStore.add(List.of(document));
@@ -118,10 +126,10 @@ public class AiService {
         deleteByDocsType(userId, "skills");
     }
 
-    public void updateEmbedSkillsDocuments(String userId,String skills) {
+    public void updateEmbedSkillsDocuments(String userId, String skills) {
 
         deleteEmbedSkillsDocuments(userId);
-        embedSkillsDocuments(skills,userId);
+        embedSkillsDocuments(skills, userId);
     }
 
     public Document buildSummaryDocuments(String summary, String userId) {
@@ -306,26 +314,17 @@ public class AiService {
         );
     }
 
-    public UserResumeResponse rag(String query, String userId) {
-
+    public UserResumeResponse rag(String query, String userId, Long profileId) {
 
         JobDetails optimizedJD = chatClient.prompt()
-                .system(system->system.text(systemExtractionMsg))
+                .system(system -> system.text(systemExtractionMsg))
                 .user(query)
                 .call()
                 .entity(ParameterizedTypeReference.forType(JobDetails.class));
 
-//        return optimizedJD;
+        MatchingValues values =  calculateMatchingScore(profileId,optimizedJD.getRequiredSkills());
 
         RetrievalAugmentationAdvisor advisor = RetrievalAugmentationAdvisor.builder()
-//                .queryTransformers(
-//                        CompressionQueryTransformer.builder()
-//                                .chatClientBuilder(chatClient.mutate().clone())
-//                                .build(),
-//                        RewriteQueryTransformer.builder()
-//                                .chatClientBuilder(chatClient.mutate().clone())
-//                                .build()
-//                )
                 .documentRetriever(
                         VectorStoreDocumentRetriever.builder()
                                 .vectorStore(vectorStore)
@@ -348,18 +347,62 @@ public class AiService {
 
         UserResumeResponse response = chatClient.prompt()
                 .advisors(advisor)
-                .system(system->system.text(systemMsg))
-                .user(userMessage->
+                .system(system -> system.text(systemMsg))
+                .user(userMessage ->
                         userMessage.text(userPrompt)
-                                .param("role",optimizedJD.getRole())
-                                .param("skills",String.join(",",optimizedJD.getRequiredSkills()))
-                                .param("responsibilities",String.join(",",optimizedJD.getResponsibilities()))
-                                .param("keywords",String.join(",",optimizedJD.getKeywords()))
+                                .param("role", optimizedJD.getRole())
+                                .param("skills", String.join(",", optimizedJD.getRequiredSkills()))
+                                .param("responsibilities", String.join(",", optimizedJD.getResponsibilities()))
+                                .param("keywords", String.join(",", optimizedJD.getKeywords()))
+                                .param("matchingScore",values.getMatchingScore())
+                                .param("missingSkills",values.getMissingSkills())
                 )
                 .call()
                 .entity(ParameterizedTypeReference.forType(UserResumeResponse.class));
 
 
         return response;
+    }
+
+
+    public MatchingValues calculateMatchingScore(Long profileId, List<String> jobSkills) {
+
+        UserProfile userProfile = profileRepository.findById(profileId)
+                .orElseThrow(()->new IllegalArgumentException("no profile found"));
+
+        List<UserSkill> obtainedSkills = skillRepository.findAllByUserProfile(userProfile);
+
+        Set<String> userSkill = new HashSet<>();
+
+        for (UserSkill skill : obtainedSkills) {
+            userSkill.add(skill.getSkill());
+        }
+
+        Set<String> requiredSkill = new HashSet<>();
+
+        for (String skill : jobSkills) {
+            requiredSkill.add(skill);
+        }
+
+        // Matching skills
+        Set<String> matchingSkills = new HashSet<>(requiredSkill);
+        matchingSkills.retainAll(userSkill);
+
+        // Missing skills
+        Set<String> missingSkills = new HashSet<>(requiredSkill);
+        missingSkills.removeAll(userSkill);
+
+        // Match percentage
+        double matchPercentage = requiredSkill.isEmpty()
+                ? 0
+                : (matchingSkills.size() * 100.0) / requiredSkill.size();
+
+
+        MatchingValues values = new MatchingValues();
+        values.setMatchingScore(matchPercentage);
+        values.setMissingSkills(String.join(",",missingSkills));
+
+        return values ;
+
     }
 }

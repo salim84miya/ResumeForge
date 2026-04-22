@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class ExperienceService {
@@ -21,6 +23,13 @@ public class ExperienceService {
 
     @Transactional
     public UserExperience saveExperience(UserExperienceInsertDto dto){
+
+        Optional<UserExperience> existingExperience =
+                repository.findByDescriptionAndOrganization(dto.getDescription(),dto.getOrganization());
+
+        if(existingExperience.isPresent()){
+            throw new IllegalArgumentException("experience already exists");
+        }
 
         UserExperience experience = new UserExperience();
 
@@ -48,18 +57,22 @@ public class ExperienceService {
         experience.setTimeline(dto.getTimeline());
         experience.setOrganization(dto.getOrganization());
 
-        return  repository.save(experience);
+        experience =  repository.save(experience);
+
+        aiService.updateEmbedExperienceDocuments(experience);
+
+        return experience;
     }
 
     @Transactional
-    public UserExperience deleteExperience(Long id){
+    public void deleteExperience(Long id){
 
         UserExperience experience = repository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("no data found"));
 
         repository.delete(experience);
 
-        return  experience;
+        aiService.deleteEmbedExperienceDocument(experience);
     }
 
     public UserExperience fetchExperience(Long id){

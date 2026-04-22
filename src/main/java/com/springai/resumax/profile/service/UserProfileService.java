@@ -9,6 +9,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
@@ -19,6 +21,12 @@ public class UserProfileService {
 
     @Transactional
     public UserProfile saveProfile(UserProfileInsertDto dto){
+
+         Optional<UserProfile> profile = repository.findByUserId(dto.getUserId());
+
+        if( profile.isPresent()){
+            throw new IllegalArgumentException("user already exists!");
+        }
 
         UserProfile userProfile = new UserProfile();
 
@@ -51,7 +59,12 @@ public class UserProfileService {
         userProfile.setSummary(dto.getSummary());
         userProfile.setLinkedIn(dto.getLinkedIn());
 
-        return  repository.save(userProfile);
+        userProfile =  repository.save(userProfile);
+
+        aiService.updateEmbedProfileDocuments(userProfile);
+        aiService.updateEmbedSummaryDocuments(userProfile);
+
+        return  userProfile;
     }
 
     @Transactional
@@ -62,7 +75,7 @@ public class UserProfileService {
 
         repository.delete(userProfile);
 
-//        return  userProfile;
+        aiService.deleteEmbedProfileDocuments(userProfile);
     }
 
 

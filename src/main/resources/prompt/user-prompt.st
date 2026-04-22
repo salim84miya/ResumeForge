@@ -12,6 +12,12 @@ Generate a complete ATS-friendly resume using my profile data.
                 Important Keywords:
                 {keywords}
 
+                Matching Score:
+                {matchingScore}
+
+                Missing Skills:
+                {missingSkills}
+
                 Instructions:
                 - Use my projects, experience, skills, and education
                 - Do NOT leave any section empty if data exists

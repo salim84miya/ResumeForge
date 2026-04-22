@@ -28,6 +28,19 @@ public class UserSkillService {
 
         UserProfile profile = profileService.fetchProfile(dto.getProfileId());
 
+        List<UserSkill> existingSkills = repository.findAllByUserProfile(profile);
+
+        if(existingSkills!=null && !existingSkills.isEmpty()){
+
+           boolean isMatchingSkillPresent = existingSkills.stream()
+                   .anyMatch(skill->dto.getSkills().contains(skill.getSkill()));
+
+           if(isMatchingSkillPresent){
+               throw new IllegalArgumentException("Skills already present");
+           }
+        }
+
+
         List<UserSkill> newSkills = new ArrayList<>();
 
         for(String skill : dto.getSkills()){
@@ -56,8 +69,18 @@ public class UserSkillService {
 
         List<UserSkill> skills = repository.findAllByUserProfile(profile);
 
-        skills.removeAll(dto.getSkills());
+        if(skills!=null && !skills.isEmpty()){
 
-          return repository.saveAll(skills);
+            skills.removeIf(skill->dto.getSkills().contains(skill.getSkill()));
+
+            skills = repository.saveAll(skills);
+
+            List<String> updatedSkills = skills.stream().map(UserSkill::getSkill).toList();
+
+            aiService.deleteEmbedSkillsDocuments(profile.getUserId());
+            aiService.embedSkillsDocuments(String.join(",",updatedSkills),profile.getUserId());
+
+        }
+        return  skills;
     }
 }

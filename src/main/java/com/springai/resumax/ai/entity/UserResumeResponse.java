@@ -22,5 +22,8 @@ public class UserResumeResponse {
 
     private List<Experience> experiences;
 
+    private Double matchingScore;
+
+    private String missingSkills;
 
 }

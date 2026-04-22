@@ -64,7 +64,6 @@ class UserProfileServiceTest {
         userProfile.setEmail("sam@gmial.com");
         userProfile.setLocation("random location");
         userProfile.setSummary("this is an random summary");
-        userProfile.setSkills("writing,java,spring boot");
         userProfile.setLinkedIn("https://sam.linkedin.com");
 
     }

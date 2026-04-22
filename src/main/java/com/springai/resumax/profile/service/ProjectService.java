@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -21,6 +23,12 @@ public class ProjectService {
 
     @Transactional
     public UserProject saveProject(UserProjectInsertDto dto){
+
+        Optional<UserProject> existingProject = repository.findByName(dto.getName());
+
+        if(existingProject.isPresent()){
+            throw new IllegalArgumentException("project already exists");
+        }
 
         UserProject project = new UserProject();
 
@@ -51,7 +59,11 @@ public class ProjectService {
         project.setDescription(dto.getDescription());
 
 
-        return repository.save(project);
+        project = repository.save(project);
+
+        aiService.updateEmbedProjectDocuments(project);
+
+        return project;
     }
 
     @Transactional
@@ -62,6 +74,7 @@ public class ProjectService {
 
        repository.delete(project);
 
+       aiService.deleteEmbedProjectDocuments(project);
 
 //        return project;
     }
