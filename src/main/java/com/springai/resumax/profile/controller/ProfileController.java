@@ -3,12 +3,13 @@ package com.springai.resumax.profile.controller;
 import com.springai.resumax.profile.dto.*;
 import com.springai.resumax.profile.entity.*;
 import com.springai.resumax.profile.service.*;
+import com.springai.resumax.utility.ResponseHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -23,12 +24,38 @@ public class ProfileController {
     private final UserSkillService skillService;
 
     @PostMapping("/profile")
-    public ResponseEntity<UserProfile> saveProfile(@RequestBody UserProfileInsertDto profileInsertDto){
+    public ResponseEntity<?> saveProfile(@RequestBody UserProfileInsertDto profileInsertDto){
 
         var response = profileService.saveProfile(profileInsertDto);
 
-        return ResponseEntity.ok(response);
+        return ResponseHandler.builder(response,null, HttpStatus.OK, LocalDateTime.now());
     }
+
+
+    @PutMapping("/profile/update")
+    public ResponseEntity<?> updateProfile(@RequestBody UserProfileUpdateDto profileUpdateDto){
+
+        var response = profileService.updateProfile(profileUpdateDto);
+
+        return ResponseHandler.builder(response,null,HttpStatus.OK,LocalDateTime.now());
+    }
+
+    @DeleteMapping("/profile/delete/{id}")
+    public ResponseEntity<?> deleteProfile(@PathVariable Long id){
+
+        profileService.deleteProfile(id);
+
+        return ResponseHandler.builder("deleted Successfully",null,HttpStatus.OK,LocalDateTime.now());
+    }
+
+    @GetMapping("/profile/fetch/{id}")
+    public ResponseEntity<?> fetchProfile(@PathVariable Long id){
+
+        var response = profileService.fetchProfile(id);
+
+        return ResponseHandler.builder(response,null,HttpStatus.OK,LocalDateTime.now());
+    }
+
 
 
     @PostMapping("/skill")
