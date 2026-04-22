@@ -20,7 +20,7 @@ public class ProjectController {
 
 
     @PostMapping("/project")
-    public ResponseEntity<?> saveProfile(@RequestBody UserProjectInsertDto dto){
+    public ResponseEntity<?> saveProject(@RequestBody UserProjectInsertDto dto){
 
         var response = projectService.saveProject(dto);
 
@@ -28,7 +28,7 @@ public class ProjectController {
     }
 
     @PutMapping("/project/update")
-    public ResponseEntity<?> updateProfile(@RequestBody UserProjectUpdateDto dto){
+    public ResponseEntity<?> updateProject(@RequestBody UserProjectUpdateDto dto){
 
         var response = projectService.updateProject(dto);
 
@@ -36,7 +36,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/project/delete/{id}")
-    public ResponseEntity<?> deleteProfile(@PathVariable Long id){
+    public ResponseEntity<?> deleteProject(@PathVariable Long id){
 
         projectService.deleteProject(id);
 
@@ -44,7 +44,7 @@ public class ProjectController {
     }
 
     @GetMapping("/project/fetch/{id}")
-    public ResponseEntity<?> fetchProfile(@PathVariable Long id){
+    public ResponseEntity<?> fetchProject(@PathVariable Long id){
 
         var response = projectService.fetchProject(id);
 

@@ -20,7 +20,7 @@ public class EducationController {
 
 
     @PostMapping("/education")
-    public ResponseEntity<?> saveProfile(@RequestBody EducationInsertDto dto){
+    public ResponseEntity<?> saveEducation(@RequestBody EducationInsertDto dto){
 
         var response = educationService.saveEducation(dto);
 
@@ -28,7 +28,7 @@ public class EducationController {
     }
 
     @PutMapping("/education/update")
-    public ResponseEntity<?> updateProfile(@RequestBody EducationUpdateDto dto){
+    public ResponseEntity<?> updateEducation(@RequestBody EducationUpdateDto dto){
 
         var response = educationService.updateEducation(dto);
 
@@ -36,7 +36,7 @@ public class EducationController {
     }
 
     @DeleteMapping("/education/delete/{id}")
-    public ResponseEntity<?> deleteProfile(@PathVariable Long id){
+    public ResponseEntity<?> deleteEducation(@PathVariable Long id){
 
         educationService.deleteEducation(id);
 
@@ -44,7 +44,7 @@ public class EducationController {
     }
 
     @GetMapping("/education/fetch/{id}")
-    public ResponseEntity<?> fetchProfile(@PathVariable Long id){
+    public ResponseEntity<?> fetchEducation(@PathVariable Long id){
 
         var response = educationService.getEducation(id);
 
