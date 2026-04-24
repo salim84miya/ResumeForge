@@ -57,7 +57,7 @@ public class UserSkillService {
 
         String embeddingSkills = String.join(",",dto.getSkills());
 
-        aiService.embedSkillsDocuments(embeddingSkills,profile.getUserId());
+        aiService.embedSkillsDocuments(embeddingSkills,profile.getId().toString());
 
         return newSkills;
     }
@@ -77,8 +77,8 @@ public class UserSkillService {
 
             List<String> updatedSkills = skills.stream().map(UserSkill::getSkill).toList();
 
-            aiService.deleteEmbedSkillsDocuments(profile.getUserId());
-            aiService.embedSkillsDocuments(String.join(",",updatedSkills),profile.getUserId());
+            aiService.deleteEmbedSkillsDocuments(profile.getId().toString());
+            aiService.embedSkillsDocuments(String.join(",",updatedSkills),profile.getId().toString());
 
         }
         return  skills;

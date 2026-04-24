@@ -1,9 +1,7 @@
 package com.springai.resumax.security.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.springai.resumax.profile.entity.UserProfile;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +20,9 @@ public class User implements UserDetails {
     private String username;
 
     private String password;
+
+    @OneToOne
+    private UserProfile userProfile;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

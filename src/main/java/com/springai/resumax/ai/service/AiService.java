@@ -58,7 +58,7 @@ public class AiService {
 
     public Document buildProfileDocument(UserProfile userProfile) {
 
-        String userId = userProfile.getUserId();
+        String userId = userProfile.getId().toString();
 
         String content = """
                 Name: %s
@@ -75,7 +75,7 @@ public class AiService {
         return new Document(
                 content,
                 Map.of(
-                        "userId", userId,
+                        "profileId", userId,
                         "type", "profile"
                 )
         );
@@ -97,12 +97,12 @@ public class AiService {
 
     public void deleteEmbedProfileDocuments(UserProfile userProfile) {
 
-        String userId = userProfile.getUserId();
+        String profileId = userProfile.getId().toString();
 
-        deleteByDocsType(userId, "profile");
+        deleteByDocsType(profileId, "profile");
     }
 
-    public Document buildSkillsDocuments(String skills, String userId) {
+    public Document buildSkillsDocuments(String skills, String profileId) {
 
         String content = """
                 Skills: %s
@@ -112,27 +112,27 @@ public class AiService {
 
         return new Document(
                 content,
-                Map.of("userId", userId,
+                Map.of("profileId", profileId,
                         "type", "skills"));
     }
 
-    public void embedSkillsDocuments(String skills, String userId) {
+    public void embedSkillsDocuments(String skills, String profileId) {
 
-        Document document = buildSkillsDocuments(skills, userId);
+        Document document = buildSkillsDocuments(skills, profileId);
         vectorStore.add(List.of(document));
     }
 
-    public void deleteEmbedSkillsDocuments(String userId) {
-        deleteByDocsType(userId, "skills");
+    public void deleteEmbedSkillsDocuments(String profileId) {
+        deleteByDocsType(profileId, "skills");
     }
 
-    public void updateEmbedSkillsDocuments(String userId, String skills) {
+    public void updateEmbedSkillsDocuments(String profileId, String skills) {
 
-        deleteEmbedSkillsDocuments(userId);
-        embedSkillsDocuments(skills, userId);
+        deleteEmbedSkillsDocuments(profileId);
+        embedSkillsDocuments(skills, profileId);
     }
 
-    public Document buildSummaryDocuments(String summary, String userId) {
+    public Document buildSummaryDocuments(String summary, String profileId) {
 
         String content = """
                 Summary: %s
@@ -142,18 +142,18 @@ public class AiService {
 
         return new Document(
                 content,
-                Map.of("userId", userId,
+                Map.of("profileId", profileId,
                         "type", "summary"));
     }
 
     public void embedSummaryDocuments(UserProfile userProfile) {
 
-        Document document = buildSummaryDocuments(userProfile.getSummary(), userProfile.getUserId());
+        Document document = buildSummaryDocuments(userProfile.getSummary(), userProfile.getId().toString());
         vectorStore.add(List.of(document));
     }
 
     public void deleteEmbedSummaryDocuments(UserProfile userProfile) {
-        deleteByDocsType(userProfile.getUserId(), "summary");
+        deleteByDocsType(userProfile.getId().toString(), "summary");
     }
 
     public void updateEmbedSummaryDocuments(UserProfile userProfile) {
@@ -178,7 +178,7 @@ public class AiService {
         return new Document(
                 content,
                 Map.of(
-                        "userId", project.getUserProfile().getUserId(),
+                        "profileId", project.getUserProfile().getId().toString(),
                         "docId", PROJECT_ID + project.getId(),
                         "type", "project"
                 )
@@ -200,9 +200,9 @@ public class AiService {
 
     public void deleteEmbedProjectDocuments(UserProject newProject) {
 
-        String userId = newProject.getUserProfile().getUserId();
+        String profileId = newProject.getUserProfile().getId().toString();
 
-        deleteByDocsId(userId, PROJECT_ID + newProject.getId());
+        deleteByDocsId(profileId, PROJECT_ID + newProject.getId());
 
     }
 
@@ -221,7 +221,7 @@ public class AiService {
         return new Document(
                 content,
                 Map.of(
-                        "userId", experience.getUserProfile().getUserId(),
+                        "profileId", experience.getUserProfile().getId().toString(),
                         "docId", EXPERIENCE_ID + experience.getId(),
                         "type", "experience"
                 )
@@ -243,14 +243,14 @@ public class AiService {
 
     public void deleteEmbedExperienceDocument(UserExperience experience) {
 
-        String userId = experience.getUserProfile().getUserId();
+        String profileId = experience.getUserProfile().getId().toString();
 
-        deleteByDocsId(userId, EXPERIENCE_ID + experience.getId());
+        deleteByDocsId(profileId, EXPERIENCE_ID + experience.getId());
     }
 
     public Document buildEducationDocuments(UserEducation education) {
 
-        String userId = education.getUserProfile().getUserId();
+        String profileId = education.getUserProfile().getId().toString();
 
         String content = """
                 Qualification: %s
@@ -263,7 +263,7 @@ public class AiService {
         );
 
         return new Document(content,
-                Map.of("userId", userId,
+                Map.of("profileId", profileId,
                         "docId", EDUCATION_ID + education.getId(),
                         "type", "education")
         );
@@ -278,9 +278,9 @@ public class AiService {
 
     public void deleteEmbedEducationDocument(UserEducation education) {
 
-        String userId = education.getUserProfile().getUserId();
+        String profileId = education.getUserProfile().getId().toString();
 
-        deleteByDocsId(userId, EDUCATION_ID + education.getId());
+        deleteByDocsId(profileId, EDUCATION_ID + education.getId());
 
     }
 
@@ -290,31 +290,31 @@ public class AiService {
         embedEducationDocuments(education);
     }
 
-    public void deleteByDocsType(String userId, String type) {
+    public void deleteByDocsType(String profileId, String type) {
 
         FilterExpressionBuilder builder = new FilterExpressionBuilder();
 
         vectorStore.delete(
                 builder.and(
-                        builder.eq("userId", userId),
+                        builder.eq("profileId", profileId),
                         builder.eq("type", type)
                 ).build()
         );
     }
 
-    public void deleteByDocsId(String userId, String docId) {
+    public void deleteByDocsId(String profileId, String docId) {
 
         FilterExpressionBuilder builder = new FilterExpressionBuilder();
 
         vectorStore.delete(
                 builder.and(
-                        builder.eq("userId", userId),
+                        builder.eq("profileId", profileId),
                         builder.eq("docId", docId)
                 ).build()
         );
     }
 
-    public UserResumeResponse rag(String query, String userId, Long profileId) {
+    public UserResumeResponse rag(String query, Long profileId) {
 
         JobDetails optimizedJD = chatClient.prompt()
                 .system(system -> system.text(systemExtractionMsg))
@@ -331,7 +331,7 @@ public class AiService {
                                 .similarityThreshold(0.3)
                                 .filterExpression(
                                         new FilterExpressionBuilder()
-                                                .eq("userId", userId)
+                                                .eq("profileId", profileId.toString())
                                                 .build()
                                 )
                                 .topK(6)

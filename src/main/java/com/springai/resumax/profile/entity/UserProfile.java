@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.entity;
 
+import com.springai.resumax.security.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,12 +16,14 @@ public class UserProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String userId;
     private String name;
     private String email;
     private String linkedIn;
     private String location;
     private String summary;
+
+    @OneToOne
+    private User user;
 
     @OneToMany(mappedBy = "userProfile")
     private List<UserSkill> skills;

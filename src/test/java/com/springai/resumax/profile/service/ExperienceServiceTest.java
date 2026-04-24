@@ -60,7 +60,7 @@ class ExperienceServiceTest {
 
 
         userProfile = new UserProfile();
-        userProfile.setUserId("1");
+        userProfile.setId(1L);
         userProfile.setName("sam turner");
         userProfile.setEmail("sam@gmial.com");
         userProfile.setLocation("random location");

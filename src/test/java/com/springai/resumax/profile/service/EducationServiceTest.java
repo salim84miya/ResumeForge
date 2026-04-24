@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.service;
 
+import com.springai.resumax.ai.service.AiService;
 import com.springai.resumax.profile.dto.EducationInsertDto;
 import com.springai.resumax.profile.dto.EducationUpdateDto;
 import com.springai.resumax.profile.entity.UserEducation;
@@ -34,7 +35,8 @@ class EducationServiceTest {
     @Mock
     private UserProfileService userProfileService;
 
-
+    @Mock
+    private AiService aiService;
 
     private UserEducation education;
     private EducationInsertDto educationInsertDto;
@@ -66,7 +68,7 @@ class EducationServiceTest {
 
         userProfile = new UserProfile();
 
-        userProfile.setUserId("1");
+        userProfile.setId(1L);
         userProfile.setName("sam turner");
         userProfile.setEmail("sam@gmial.com");
         userProfile.setLocation("random location");

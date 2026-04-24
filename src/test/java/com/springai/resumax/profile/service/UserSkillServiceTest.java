@@ -47,7 +47,7 @@ class UserSkillServiceTest {
     void setUp() {
 
         userProfile = new UserProfile();
-        userProfile.setUserId("1");
+        userProfile.setId(1L);
         userProfile.setName("sam turner");
         userProfile.setEmail("sam@gmial.com");
         userProfile.setLocation("random location");
@@ -104,7 +104,7 @@ class UserSkillServiceTest {
         assertEquals(insertDto.getSkills().get(0),newSkills.get(0).getSkill());
         assertEquals(insertDto.getSkills().get(1),newSkills.get(1).getSkill());
 
-        verify(aiService,times(1)).embedSkillsDocuments(String.join(",",insertDto.getSkills()), userProfile.getUserId());
+        verify(aiService,times(1)).embedSkillsDocuments(String.join(",",insertDto.getSkills()), userProfile.getId().toString());
     }
 
     @Test
@@ -118,7 +118,7 @@ class UserSkillServiceTest {
 
         List<String> userSkills = updatedSkills.stream().map(UserSkill::getSkill).toList();
 
-        verify(aiService,times(1)).deleteEmbedSkillsDocuments(userProfile.getUserId());
-        verify(aiService,times(1)).embedSkillsDocuments(String.join(",",userSkills),userProfile.getUserId());
+        verify(aiService,times(1)).deleteEmbedSkillsDocuments(userProfile.getId().toString());
+        verify(aiService,times(1)).embedSkillsDocuments(String.join(",",userSkills),userProfile.getId().toString());
     }
 }

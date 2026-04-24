@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.service;
 
+import com.springai.resumax.ai.service.AiService;
 import com.springai.resumax.profile.dto.UserProjectInsertDto;
 import com.springai.resumax.profile.dto.UserProjectUpdateDto;
 import com.springai.resumax.profile.entity.UserProfile;
@@ -30,6 +31,9 @@ class ProjectServiceTest {
 
     @InjectMocks
     private ProjectService projectService;
+
+    @Mock
+    private AiService aiService;
 
     private UserProject project;
     private UserProjectInsertDto projectInsertDto;
@@ -65,7 +69,7 @@ class ProjectServiceTest {
 
         userProfile = new UserProfile();
 
-        userProfile.setUserId("1");
+        userProfile.setId(1L);
         userProfile.setName("sam turner");
         userProfile.setEmail("sam@gmial.com");
         userProfile.setLocation("random location");
@@ -95,6 +99,8 @@ class ProjectServiceTest {
         UserProject obtainedProject =  projectService.saveProject(projectInsertDto);
 
         assertEquals(project.getName(),obtainedProject.getName());
+
+        verify(aiService,times(1)).embedProjectDocuments(project);
     }
 
     @Test
@@ -110,6 +116,8 @@ class ProjectServiceTest {
         UserProject updatedProject = projectService.updateProject(projectUpdateDto);
 
         assertEquals(project.getName(),updatedProject.getName());
+
+        verify(aiService,times(1)).updateEmbedProjectDocuments(updatedProject);
     }
 
     @Test
@@ -122,6 +130,8 @@ class ProjectServiceTest {
         projectService.deleteProject(1L);
 
         verify(projectRepository,times(1)).delete(project);
+
+        verify(aiService,times(1)).deleteEmbedProjectDocuments(project);
     }
 
     @Test

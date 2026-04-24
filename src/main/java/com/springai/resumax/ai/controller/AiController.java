@@ -14,12 +14,11 @@ public class AiController {
 
     //doing rag
 
-    @GetMapping("/rag/{id}/{profileId}")
+    @GetMapping("/rag/{profileId}")
     public ResponseEntity<?> rag(@RequestParam(value = "q") String query,
-                                 @PathVariable(value = "id")String userId,
                                  @PathVariable(value = "profileId")Long profileId){
 
-        var response = aiService.rag(query,userId,profileId);
+        var response = aiService.rag(query,profileId);
 
         return ResponseEntity.ok(response);
     }

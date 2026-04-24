@@ -5,6 +5,8 @@ import com.springai.resumax.profile.dto.UserProfileInsertDto;
 import com.springai.resumax.profile.dto.UserProfileUpdateDto;
 import com.springai.resumax.profile.entity.UserProfile;
 import com.springai.resumax.profile.repository.UserProfileRepository;
+import com.springai.resumax.security.entity.User;
+import com.springai.resumax.security.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,28 +19,35 @@ public class UserProfileService {
 
     private final UserProfileRepository repository;
 
+    private final UserRepository userRepository;
+
     private final AiService aiService;
 
     @Transactional
     public UserProfile saveProfile(UserProfileInsertDto dto){
 
-         Optional<UserProfile> profile = repository.findByUserId(dto.getUserId());
+        User user = userRepository.findById(dto.getUserId()).orElseThrow(()->
+                new IllegalArgumentException("no user found"));
+
+
+         Optional<UserProfile> profile = repository.findByUser(user);
 
         if( profile.isPresent()){
-            throw new IllegalArgumentException("user already exists!");
+            throw new IllegalArgumentException("profile already exists!");
         }
 
         UserProfile userProfile = new UserProfile();
 
-        userProfile.setUserId(dto.getUserId());
         userProfile.setName(dto.getName());
         userProfile.setEmail(dto.getEmail());
         userProfile.setLocation(dto.getLocation());
         userProfile.setSummary(dto.getSummary());
         userProfile.setLinkedIn(dto.getLinkedIn());
-
+        userProfile.setUser(user);
 
         userProfile =  repository.save(userProfile);
+
+        user.setUserProfile(userProfile);
 
         aiService.embedProfileDocuments(userProfile);
         aiService.embedSummaryDocuments(userProfile);
@@ -52,7 +61,7 @@ public class UserProfileService {
         UserProfile userProfile = repository.findById(dto.getId())
                 .orElseThrow(()->new IllegalArgumentException("no data found"));
 
-        userProfile.setUserId(dto.getUserId());
+//        userProfile.setUserId(dto.getUserId());
         userProfile.setName(dto.getName());
         userProfile.setEmail(dto.getEmail());
         userProfile.setLocation(dto.getLocation());

@@ -5,7 +5,8 @@ import lombok.Data;
 @Data
 public class UserProfileInsertDto {
 
-    private String userId;
+    private Long userId;
+//    private String userId;
     private String name;
     private String email;
     private String linkedIn;
