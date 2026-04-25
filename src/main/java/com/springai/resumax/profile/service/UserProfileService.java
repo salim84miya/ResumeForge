@@ -9,12 +9,16 @@ import com.springai.resumax.security.entity.User;
 import com.springai.resumax.security.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserProfileService {
 
     private final UserProfileRepository repository;
@@ -22,6 +26,8 @@ public class UserProfileService {
     private final UserRepository userRepository;
 
     private final AiService aiService;
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Transactional
     public UserProfile saveProfile(UserProfileInsertDto dto){
@@ -49,6 +55,8 @@ public class UserProfileService {
 
         user.setUserProfile(userProfile);
 
+        userRepository.save(user);
+
         aiService.embedProfileDocuments(userProfile);
         aiService.embedSummaryDocuments(userProfile);
 
@@ -61,7 +69,6 @@ public class UserProfileService {
         UserProfile userProfile = repository.findById(dto.getId())
                 .orElseThrow(()->new IllegalArgumentException("no data found"));
 
-//        userProfile.setUserId(dto.getUserId());
         userProfile.setName(dto.getName());
         userProfile.setEmail(dto.getEmail());
         userProfile.setLocation(dto.getLocation());
@@ -82,9 +89,19 @@ public class UserProfileService {
         UserProfile userProfile = repository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("no data found"));
 
+        userProfile.getUser().setUserProfile(null);
+
+        logger.info("called delete profile found {}",userProfile.getId());
+
         repository.delete(userProfile);
 
+        logger.info("delete user profile from db successfully");
+
+
+        logger.info("called embed profile document");
+
         aiService.deleteEmbedProfileDocuments(userProfile);
+        aiService.deleteEmbedSummaryDocuments(userProfile);
     }
 
 

@@ -7,6 +7,9 @@ import com.springai.resumax.ai.entity.UserResumeResponse;
 import com.springai.resumax.profile.entity.*;
 import com.springai.resumax.profile.repository.UserProfileRepository;
 import com.springai.resumax.profile.repository.UserSkillRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
@@ -26,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class AiService {
 
     private static final String PROJECT_ID = "projectId";
@@ -36,6 +40,8 @@ public class AiService {
     private final VectorStore vectorStore;
     private final UserSkillRepository skillRepository;
     private final UserProfileRepository profileRepository;
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
     @Value("classpath:/prompt/system-prompt.st")
@@ -99,7 +105,11 @@ public class AiService {
 
         String profileId = userProfile.getId().toString();
 
+        logger.info("User delete embed profileId {}",profileId);
+
         deleteByDocsType(profileId, "profile");
+
+        logger.info("deleted profile Successfully");
     }
 
     public Document buildSkillsDocuments(String skills, String profileId) {

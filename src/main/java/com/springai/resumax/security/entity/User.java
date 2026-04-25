@@ -1,5 +1,6 @@
 package com.springai.resumax.security.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.springai.resumax.profile.entity.UserProfile;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class User implements UserDetails {
 
     private String password;
 
+    @JsonIgnore
     @OneToOne
     private UserProfile userProfile;
 

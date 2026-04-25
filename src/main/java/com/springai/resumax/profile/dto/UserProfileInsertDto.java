@@ -6,12 +6,10 @@ import lombok.Data;
 public class UserProfileInsertDto {
 
     private Long userId;
-//    private String userId;
     private String name;
     private String email;
     private String linkedIn;
     private String location;
     private String summary;
-    private String skills;
 
 }

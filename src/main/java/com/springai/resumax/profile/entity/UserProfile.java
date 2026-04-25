@@ -1,5 +1,6 @@
 package com.springai.resumax.profile.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.springai.resumax.security.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -22,18 +23,23 @@ public class UserProfile {
     private String location;
     private String summary;
 
+    @JsonIgnore
     @OneToOne
     private User user;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "userProfile")
     private List<UserSkill> skills;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "userProfile")
     private List<UserEducation> userEducation;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "userProfile")
     private List<UserProject> userProjects;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "userProfile")
     private List<UserExperience> userExperiences;
 

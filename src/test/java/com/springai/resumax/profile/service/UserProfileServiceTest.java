@@ -53,18 +53,15 @@ class UserProfileServiceTest {
         profileDto.setEmail("sam@gmial.com");
         profileDto.setLocation("random location");
         profileDto.setSummary("this is an random summary");
-        profileDto.setSkills("writing,java,spring boot");
         profileDto.setLinkedIn("https://sam.linkedin.com");
 
         updateProfileDto = new UserProfileUpdateDto();
 
         updateProfileDto.setId(1L);
-        updateProfileDto.setUserId("1");
         updateProfileDto.setName("sam turner");
         updateProfileDto.setEmail("sam@gmial.com");
         updateProfileDto.setLocation("random location");
         updateProfileDto.setSummary("this is an random summary");
-        updateProfileDto.setSkills("writing,java,spring boot");
         updateProfileDto.setLinkedIn("https://sam.linkedin.com");
 
         userProfile = new UserProfile();

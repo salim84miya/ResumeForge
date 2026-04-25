@@ -18,12 +18,13 @@ public class SecurityFilterConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
 
         security
-                .csrf(csrfConfig->csrfConfig.disable())
-                .sessionManagement(session->
+                .csrf(csrfConfig -> csrfConfig.disable())
+                .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth-> auth
-                                .requestMatchers("/user/**").permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/user/**").permitAll()
+//                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .anyRequest().permitAll()
 
                 )
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
