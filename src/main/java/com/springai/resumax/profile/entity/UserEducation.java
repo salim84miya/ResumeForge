@@ -3,9 +3,11 @@ package com.springai.resumax.profile.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Data
+@ToString(exclude = {"userProfile"})
 public class UserEducation {
 
     @Id

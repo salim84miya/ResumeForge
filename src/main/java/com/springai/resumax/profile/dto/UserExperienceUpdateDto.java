@@ -12,7 +12,4 @@ public class UserExperienceUpdateDto {
     private String timeline;
 
     private String description;
-
-    private Long profileId;
-
 }

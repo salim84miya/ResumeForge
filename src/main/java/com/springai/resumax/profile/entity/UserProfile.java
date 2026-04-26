@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.springai.resumax.security.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Data
+@ToString(exclude = {"skills","userEducation","userProjects","userExperiences"})
 public class UserProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,19 +30,19 @@ public class UserProfile {
     private User user;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "userProfile")
+    @OneToMany(mappedBy = "userProfile",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<UserSkill> skills;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "userProfile")
+    @OneToMany(mappedBy = "userProfile",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<UserEducation> userEducation;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "userProfile")
+    @OneToMany(mappedBy = "userProfile",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<UserProject> userProjects;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "userProfile")
+    @OneToMany(mappedBy = "userProfile",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<UserExperience> userExperiences;
 
     @CreationTimestamp
