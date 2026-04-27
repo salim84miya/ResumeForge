@@ -55,7 +55,6 @@ class ExperienceServiceTest {
        updateDto.setTimeline("Jan 2025 – Present");
        updateDto.setOrganization("Self / Personal Projects");
        updateDto.setDescription("Developed scalable backend systems using Spring Boot and microservices architecture. Implemented JWT-based authentication with refresh tokens and multi-device session management, improving system security. Optimized API performance using Redis caching, reducing response time by 35%.");
-       updateDto.setProfileId(1L);
        updateDto.setId(1L);
 
 
