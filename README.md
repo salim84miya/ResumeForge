@@ -142,9 +142,12 @@ Structured Resume → PDF
 
 ### 🥇 1. Clone Repository
 
-git clone https://github.com/YOUR_USERNAME/resumeforge.git
+```
+git clone https://github.com/salim84miya/ResumeForge.git
+```
+```
 cd resumeforge
-
+```
 ---
 
 ### 🥈 2. Configure Environment Variables
@@ -209,23 +212,27 @@ SPRING_DATASOURCE_PASSWORD=yourpassword
 
 ### 🥉 3. Run Application
 
+```
 ./mvnw spring-boot:run
 
+```
 ---
 
 ## 🐳 Run with Docker
 
----
-
 ### Pull Image
 
+```
 docker pull salim84dev/resumeforge:latest
+```
 
 ---
 
 ### Run Container
 
+```
 docker run -p 8080:8080 -e openai-api-key=<api-key> -e database_url=<database-url> -e database_username=<database-username> -e database_password=<database-password> -e jwt-security-key=<jwt-security-key>  --name <container-name> resumeforge:latest
+```
 
 ---
 
