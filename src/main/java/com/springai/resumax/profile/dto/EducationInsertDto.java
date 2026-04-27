@@ -11,5 +11,6 @@ public class EducationInsertDto {
     private String qualification; // company / org
     private String timeline;
     private String grade;
+    @NotBlank
     private Long profileId;
 }
