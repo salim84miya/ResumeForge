@@ -14,6 +14,8 @@ public class UserResumeResponse {
     private String location;
     private String summary;
 
+    private List<String> keyword;
+
     private List<Education> education;
 
     private List<SkillGroup> skillGroups;
@@ -25,5 +27,7 @@ public class UserResumeResponse {
     private Double matchingScore;
 
     private String missingSkills;
+
+    private List<String> keyAchievements;
 
 }

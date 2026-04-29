@@ -36,7 +36,12 @@ You are an expert AI resume optimizer.
                     3. Technologies/tools used
                   - Include measurable impact wherever possible (e.g., improved performance by X%, reduced latency, handled X users)
                   - Keep points concise, strong, and results-oriented
-                
+
+                -Key Achievements
+                    -Contains 4 to 5 main achievements
+                    -should be given in short concise bullet points
+                    -wherever possible add measurable,impact metrics
+
                 - General:
                   - Remove irrelevant or weak content
                   - Avoid repetition

@@ -8,6 +8,7 @@ import java.util.List;
 public class Project {
 
     private String name;
+    private String shortTitle;
     private String timeline; // "Jan 2025 – Mar 2025"
 
     private List<String> description;
